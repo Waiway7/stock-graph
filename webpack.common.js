@@ -1,6 +1,8 @@
 const path = require("path");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const outputDir = "./dist";
+const Dotenv = require('dotenv-webpack');
+// const { definitions } = new Dotenv();
 
 module.exports = {
   entry: path.resolve(__dirname, "src", "index.js"), //
@@ -76,6 +78,9 @@ module.exports = {
     ]
   },
   plugins: [
+    new Dotenv({
+      path: path.resolve(__dirname,'src', './.env')
+    }),
     new MiniCssExtractPlugin({
       // Options similar to the same options in webpackOptions.output
       // all options are optional
@@ -84,5 +89,6 @@ module.exports = {
       ignoreOrder: false // Enable to remove warnings about conflicting order
     }),
     require("autoprefixer")
-  ]
+  ],
+ 
 };

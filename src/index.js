@@ -1,5 +1,6 @@
 import "./styles/index.scss";
 // import yodaStitch from "./images/yoda-stitch.jpg";
+// require('dotenv').config();
 const testObj = {
   key1: "hi",
   key2: {
@@ -7,8 +8,11 @@ const testObj = {
   }
 };
 
+
+
 const greeting = testObj?.key2?.key3 || testObj.key1;
 window.addEventListener("DOMContentLoaded", () => {
+  console.log(process.env.API_KEY)
   document.body.classList.add("center");
   const card = document.createElement("div");
   card.classList.add("card", "center");
