@@ -7,16 +7,24 @@ const apiKey = process.env.API_KEY
 var intrinioSDK = require('intrinio-sdk');
 intrinioSDK.ApiClient.instance.authentications['ApiKeyAuth'].apiKey = `${apiKey}`;
 
-var stockExchangeAPI = new intrinioSDK.StockExchangeApi();
+var securityAPI = new intrinioSDK.SecurityApi();
 
-var identifier = "USCOMP"; // String | A Stock Exchange identifier (MIC or Intrinio ID)
+var identifier = "AAPL"; // String | A Security identifier (Ticker, FIGI, ISIN, CUSIP, Intrinio ID)
 
+var opts = { 
+  'startDate': new Date("2018-01-01"), // Date | Return prices on or after the date
+  'endDate': new Date("2019-01-01"), // Date | Return prices on or before the date
+  'frequency': "daily", // String | Return stock prices in the given frequency
+  'pageSize': 365, // Number | The number of results to return
+  'nextPage': null // String | Gets the next page of data from a previous API call
+};
 
-stockExchangeAPI.getStockExchangeById(identifier).then(function(data) {
+securityAPI.getSecurityStockPrices(identifier, opts).then(function(data) {
   console.log(data);
 }, function(error) {
   console.error(error);
 });
+
 const testObj = {
   key1: "hi",
   key2: {

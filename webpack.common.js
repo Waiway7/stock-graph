@@ -17,6 +17,9 @@ module.exports = {
   module: {
     rules: [
       {
+        parser: {
+          amd: false
+        },
         test: /\.js$/, // if we were using React.js, we would use \.jsx?$/
         use: {
           loader: "babel-loader",

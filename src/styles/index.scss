@@ -19,6 +19,10 @@ body {
   flex-direction: column;
 }
 
+svg {
+  border: 1px solid lightgray;
+}
+
 .center {
   display: flex;
   align-items: center;
