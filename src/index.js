@@ -1,48 +1,39 @@
 import "./styles/index.scss";
+import {drawChart} from "./graph/line_chart.js";
+import * as d3 from "d3";
+
 // import yodaStitch from "./images/yoda-stitch.jpg";
 // require('dotenv').config();
 
 const apiKey = process.env.API_KEY
 
 var intrinioSDK = require('intrinio-sdk');
-intrinioSDK.ApiClient.instance.authentications['ApiKeyAuth'].apiKey = `${apiKey}`;
+// intrinioSDK.ApiClient.instance.authentications['ApiKeyAuth'].apiKey = `${apiKey}`;
 
-var securityAPI = new intrinioSDK.SecurityApi();
+// var companyAPI = new intrinioSDK.CompanyApi();
 
-var identifier = "AAPL"; // String | A Security identifier (Ticker, FIGI, ISIN, CUSIP, Intrinio ID)
+// var opts = { 
+//   'latestFilingDate': null, // Date | Return companies whose latest 10-Q or 10-K was filed on or after this date
+//   'sic': null, // String | Return companies with the given Standard Industrial Classification code
+//   'template': null, // String | Return companies with the given financial statement template
+//   'sector': null, // String | Return companies in the given industry sector
+//   'industryCategory': null, // String | Return companies in the given industry category
+//   'industryGroup': null, // String | Return companies in the given industry group
+//   'hasFundamentals': true, // Boolean | Return only companies that have fundamentals when true
+//   'hasStockPrices': true, // Boolean | Return only companies that have stock prices when true
+//   'pageSize': 100, // Number | The number of results to return
+//   'nextPage': null // String | Gets the next page of data from a previous API call
+// };
 
-var opts = { 
-  'startDate': new Date("2018-01-01"), // Date | Return prices on or after the date
-  'endDate': new Date("2019-01-01"), // Date | Return prices on or before the date
-  'frequency': "daily", // String | Return stock prices in the given frequency
-  'pageSize': 365, // Number | The number of results to return
-  'nextPage': null // String | Gets the next page of data from a previous API call
-};
-
-securityAPI.getSecurityStockPrices(identifier, opts).then(function(data) {
-  console.log(data);
-}, function(error) {
-  console.error(error);
-});
-
-const testObj = {
-  key1: "hi",
-  key2: {
-    key3: "Hello"
-  }
-};
+// companyAPI.getAllCompanies(opts).then(function(data) {
+//   console.log(data);
+// }, function(error) {
+//   console.error(error);
+// });
 
 
 
-const greeting = testObj?.key2?.key3 || testObj.key1;
 window.addEventListener("DOMContentLoaded", () => {
   console.log(process.env.API_KEY)
-  document.body.classList.add("center");
-  const card = document.createElement("div");
-  card.classList.add("card", "center");
-  card.innerHTML = `<h2>${greeting} World!</h2>`;
-  document.body.append(card);
-  const imgCard = document.createElement("div");
-  imgCard.classList.add("card", "center", "image-card");
-  document.body.appendChild(imgCard);
+  drawChart();
 });
