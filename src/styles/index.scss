@@ -10,6 +10,20 @@
   justify-content: center;
 }
 
+.svg-container {
+  display: inline-block;
+  position: relative;
+  min-width: 100%;
+  padding-bottom: 100%; /* aspect ratio */
+  vertical-align: top;
+  overflow: hidden;
+}
+.svg-content-responsive {
+  display: inline-block;
+  position: relative;
+  top: 10px;
+  left: 0;
+}
 
 
 // TYPOGRAPHY
