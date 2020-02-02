@@ -5,7 +5,7 @@ const Dotenv = require('dotenv-webpack');
 // const { definitions } = new Dotenv();
 
 module.exports = {
-  entry: path.resolve(__dirname, "src", "index.js"), //
+  entry: ['@babel/polyfill', path.resolve(__dirname, "src", "index.js")], //
   output: {
     path: path.join(__dirname, outputDir),
     filename: "[name].js",
@@ -25,7 +25,12 @@ module.exports = {
           loader: "babel-loader",
           options: {
             presets: ["@babel/preset-env"],
-            plugins: ["@babel/plugin-proposal-optional-chaining"],
+            plugins: [["@babel/plugin-proposal-optional-chaining"],
+            ["@babel/plugin-transform-runtime",
+            {
+              "regenerator": true
+            }
+          ]],
             exclude: /node_modules/
           } // if we were using React.js, we would include "react"
         }

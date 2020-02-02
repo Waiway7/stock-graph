@@ -1,6 +1,7 @@
 import * as d3 from "d3";
 
 export function drawChart(data){
+    console.log(data)
     const svgWidth = 600, svgHeight = 400;
     const margin = { top: 20, right: 20, bottom: 30, left: 50};
     const width = svgWidth - margin.left - margin.right;
