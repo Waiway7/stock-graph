@@ -16,7 +16,7 @@ export function drawChart(dataArr){
     const parentDiv = document.getElementById("chart");
     // const svgWidth = 600
     // const svgHeight = 400
-    const data = parseData(dataArr);
+    const data = dataArr;
     // const svgWidth = 1500, svgHeight = 400;
     
     const div = d3.select("#chart")
@@ -33,7 +33,7 @@ export function drawChart(dataArr){
     const svgHeight = 400;
 
 
-    const infoContainer = d3.select(".svg-container")
+    const infoContainer = d3.select("#chart")
                             .append("div")
                             .classed("security-info", true)
    
@@ -45,7 +45,7 @@ export function drawChart(dataArr){
 
     const g = svg.append("g")
                 .attr("transform", "translate(" + margin.left + ", "+ margin.top + ")")
-    const x = d3.scaleTime().range([0, width]).nice();
+    const x = d3.scaleTime().range([0, width]);
     const y = d3.scaleLinear().range([height, 0])
 
     const line = d3.line()
@@ -53,27 +53,84 @@ export function drawChart(dataArr){
                     .y(function(d){return y(d.close)})
    
     x.domain(
-        d3.extent(data, function(d){return d.date}))
-        .nice();
-    y.domain(d3.extent(data, function(d){return d.close}))
-        .nice();
+        d3.extent(data, function(d){return d.date})).nice();
+        
+    y.domain(d3.extent(data, function(d){return d.close})).nice();
+        
 
     g.append("g")
         .attr("transform", "translate(0, " + height + ")")
         .call(d3.axisBottom(x)
+            .tickPadding(10)
             .tickFormat(function(d){
-                const month = d.getMonth().toString().length === 1 ? `0${d.getMonth() + 1}` : d.getMonth();
+                const month = (d.getMonth() + 1).toString().length === 1 ? `0${d.getMonth() + 1}` : d.getMonth() + 1;
                 const day = d.getDate().toString().length === 1 ? "0" + d.getDate().toString() : d.getDate();
                 if (month === 1 && day === 1){
                     return d.getFullYear()
                 }
                 return `${month}-${day}`
             })
+            .tickSize(-height)
+            // .call(g => {
+            //  })
         )
+        .call(g => {
+            g.selectAll("text")
+                .attr('fill', '#000000')
+                .attr('stroke-width', 0.7)
+                // .attr('opacity', 0.3)
+
+            g.selectAll("line")
+                .attr('stroke', '#A9A9A9')
+                .attr('stroke-width', 0.7)
+                .attr('opacity', 0.3)
+
+            g.select(".domain")
+                .attr('stroke', "#A9A9A9")
+                .attr('stroke-width', 0.7)
+                .attr('opacity, 0.3')
+            // g.select(".domain")
+            //     .attr('stroke', "none")
+        })
+   
+
+
+
+    // const area = d3.area()
+    //                 .x(function(d){return x(d.date);})
+    //                 .y0(height)
+    //                 .y1(function(d){return y(d.close);})
 
     g.append("g")
         .attr("transform", "translate(" + width +", "+ 0 + ")")
-        .call(d3.axisRight(y));
+        .call(d3.axisRight(y)
+            .tickPadding(10)
+            .tickSize(-width))
+        .call(g => {
+            g.selectAll("text")
+                .attr('fill', '#000000')
+                .attr('stroke-width', 0.7)
+                // .attr('opacity', 0.3)
+
+            g.selectAll("line")
+                .attr('stroke', '#A9A9A9')
+                .attr('stroke-width', 0.7)
+                .attr('opacity', 0.3)
+
+            g.select(".domain")
+                .attr('stroke', "#A9A9A9")
+                .attr('stroke-width', 0.7)
+                .attr('opacity, 0.3')
+            // g.select(".domain")
+            //     .attr('stroke', "none")
+        })
+        
+
+    // g.append("path")
+    //     .datum(data)
+    //     .attr("fill", "#000000")
+    //     .attr("class", "area")
+    //     .attr("d", area)
 
     g.append("path")
         .datum(data)
@@ -81,7 +138,7 @@ export function drawChart(dataArr){
         .attr("stroke", "steelblue")
         .attr("stroke-linejoin", "round")
         .attr("stroke-linecap", "round")
-        .attr("stroke-width", 1.5)
+        .attr("stroke-width", 1.0)
         .attr("d", line)
 }
 
