@@ -12,13 +12,15 @@ const parseData = (data) => {
 }
 
 export function drawChart(dataArr){
-    const parentDiv = document.getElementById("chart");
-    // const svgWidth = 600
-    // const svgHeight = 400
-  
+
+    const svgWidth = 800;
+    const svgHeight = 400;
+    const margin = { top: 20, right: 20, bottom: 30, left: 18};
+    const width = svgWidth - margin.left - margin.right;
+    const height = svgHeight - margin.top - margin.bottom;
+
     const data = dataArr;
-    // const svgWidth = 1500, svgHeight = 400;
-    
+
     const div = d3.select("#chart")
                     .append("div")
                     .classed("svg-container", true)
@@ -27,10 +29,8 @@ export function drawChart(dataArr){
                     .classed("svg-graph", true)
                     .attr("preserveAspectRatio", "xMinYMin meet")
                     .attr("viewBox", "0 0 850 400")
-    
-    const findSVG = document.querySelector(".svg-graph")
-    const svgWidth = 800;
-    const svgHeight = 400;
+                    .append("g")
+                        .attr("transform", "translate(" + margin.left + ", "+ margin.top + ")")
 
 
     const infoContainer = d3.select("#chart")
@@ -38,13 +38,6 @@ export function drawChart(dataArr){
                             .classed("security-info", true)
    
 
-    const margin = { top: 20, right: 20, bottom: 30, left: 18};
-    const width = svgWidth - margin.left - margin.right;
-    // console.log(width)
-    const height = svgHeight - margin.top - margin.bottom;
-
-    const g = svg.append("g")
-                .attr("transform", "translate(" + margin.left + ", "+ margin.top + ")")
     const x = d3.scaleTime().range([0, width]);
     const y = d3.scaleLinear().range([height, 0])
 
@@ -57,7 +50,7 @@ export function drawChart(dataArr){
     y.domain(d3.extent(data, function(d){return d.close})).nice();
         
 
-    g.append("g")
+    svg.append("g")
         .attr('class', 'x-axis')
         .attr("transform", "translate(0, " + height + ")")
         .call(d3.axisBottom(x)
@@ -69,6 +62,7 @@ export function drawChart(dataArr){
                 }
                 return `${month}-${day}`
             })
+                 .tickPadding(10)
             .tickSize(-height)
             // .call(g => {
             //  })
@@ -101,10 +95,13 @@ export function drawChart(dataArr){
     //                 .y0(height)
     //                 .y1(function(d){return y(d.close);})
 
-    g.append("g")
+    svg.append("g")
         .attr('class', 'y-axis')
         .attr("transform", "translate(" + width +", "+ 0 + ")")
         .call(d3.axisRight(y)
+            .tickFormat((d) => {
+                return d3.format(".2f")(d)
+            })
             .tickPadding(10)
             .tickSize(-width))
         .call(g => {
@@ -133,7 +130,7 @@ export function drawChart(dataArr){
     //     .attr("class", "area")
     //     .attr("d", area)
 
-    g.append("path")
+    svg.append("path")
         .datum(data)
         .attr("fill", "none")
         .attr("stroke", "steelblue")
@@ -141,5 +138,15 @@ export function drawChart(dataArr){
         .attr("stroke-linecap", "round")
         .attr("stroke-width", 1.0)
         .attr("d", line)
+
+    const toolTip = svg.append("g");
+
+    // svg.on("touchmove mousemove", () => {
+    //     const {date, close}
+    // })
+
+    
+
+    return svg.node()
 }
 
