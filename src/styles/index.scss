@@ -10,6 +10,15 @@
   justify-content: center;
 }
 
+.x-axis > g:last-child, .x-axis > g:nth-child(2){
+  opacity: 0;
+}
+
+.y-axis > g:last-child, .y-axis > g:nth-child(2){
+  opacity: 0;
+}
+
+
 #chart{
   display: flex;
   width: 100%;

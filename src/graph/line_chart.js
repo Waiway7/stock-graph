@@ -11,11 +11,11 @@ const parseData = (data) => {
     return dataArr
 }
 
-
 export function drawChart(dataArr){
     const parentDiv = document.getElementById("chart");
     // const svgWidth = 600
     // const svgHeight = 400
+  
     const data = dataArr;
     // const svgWidth = 1500, svgHeight = 400;
     
@@ -52,16 +52,15 @@ export function drawChart(dataArr){
                     .x(function(d){return x(d.date)})
                     .y(function(d){return y(d.close)})
    
-    x.domain(
-        d3.extent(data, function(d){return d.date})).nice();
+    x.domain(d3.extent(data, function(d){return d.date})).nice()
         
     y.domain(d3.extent(data, function(d){return d.close})).nice();
         
 
     g.append("g")
+        .attr('class', 'x-axis')
         .attr("transform", "translate(0, " + height + ")")
         .call(d3.axisBottom(x)
-            .tickPadding(10)
             .tickFormat(function(d){
                 const month = (d.getMonth() + 1).toString().length === 1 ? `0${d.getMonth() + 1}` : d.getMonth() + 1;
                 const day = d.getDate().toString().length === 1 ? "0" + d.getDate().toString() : d.getDate();
@@ -78,7 +77,8 @@ export function drawChart(dataArr){
             g.selectAll("text")
                 .attr('fill', '#000000')
                 .attr('stroke-width', 0.7)
-                // .attr('opacity', 0.3)
+            g.selectAll('text'[0][0])
+                .attr('opacity', 0)    
 
             g.selectAll("line")
                 .attr('stroke', '#A9A9A9')
@@ -102,6 +102,7 @@ export function drawChart(dataArr){
     //                 .y1(function(d){return y(d.close);})
 
     g.append("g")
+        .attr('class', 'y-axis')
         .attr("transform", "translate(" + width +", "+ 0 + ")")
         .call(d3.axisRight(y)
             .tickPadding(10)
