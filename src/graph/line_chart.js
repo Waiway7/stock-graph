@@ -11,6 +11,69 @@ const parseData = (data) => {
     return dataArr
 }
 
+const toolTip = (data, svg, width, height, margin, xScale, yScale, xDomain, yDomain) => {
+
+    const bisectDate = d3.bisector((d) => d.date).left
+    const focus = svg.append("g")
+                    .attr("class", "focus")
+                    .style("display", "none");
+
+                    
+    focus.append("line")
+        .attr("class", "x-hover-line")
+
+    focus.append("line")
+        .attr("class", "y-hover-line")
+
+    focus.append("g")
+        .attr("class", "close-price-container")
+        .style("background-color", "#D3D3D3")
+        .style('padding', 6)
+        .append("text")
+            .attr("class", "close-price")
+            .style("fill", "#A9A9A9")
+            .style("font-size", 12)
+            .attr("dy", ".31em");
+
+    svg.append("rect")
+        .attr("transform", "translate(" + 0 + "," + margin.top + ")")
+        .attr("class", "overlay")
+        .attr("width", width)
+        .attr("height", height)
+        .on("mouseover", function() { focus.style("display", null); })
+        .on("mouseout", function() { focus.style("display", "none"); })
+        .on("mousemove", mousemove);
+
+    function mousemove() {
+        var x0 = xScale.invert(d3.mouse(this)[0]);
+   
+        let i = bisectDate(data, x0, 1);
+        let d0 = data[i - 1];
+        let d1 = data[i];
+        let d = x0 - d0.date > d1.date - x0 ? d1 : d0;
+
+        var x = xScale(d.date);
+        var y = yScale(d.close);
+        console.log(yDomain[0])
+
+        focus.select(".close-price-container")
+            .attr("transform", "translate(" + (xScale(xDomain[1]) + 10) + "," + (y) + ")")
+        focus.select(".close-price")
+            .text(function() { return d.close; })
+        focus.select('.x-hover-line')
+            .attr('x1', x)
+            .attr('y1', yScale(yDomain[0]))
+            .attr('x2', x)
+            .attr('y2', yScale(yDomain[1]));
+        focus.select('.y-hover-line')
+            .attr('x1', xScale(xDomain[0]))
+            .attr('y1', y)
+            .attr('x2', xScale(xDomain[1]))
+            .attr('y2', y);
+            
+    }
+}
+
 export function drawChart(dataArr){
 
     const svgWidth = 800;
@@ -19,7 +82,7 @@ export function drawChart(dataArr){
     const width = svgWidth - margin.left - margin.right;
     const height = svgHeight - margin.top - margin.bottom;
 
-    const data = dataArr;
+    const data = dataArr.reverse();
 
     const div = d3.select("#chart")
                     .append("div")
@@ -36,24 +99,23 @@ export function drawChart(dataArr){
     const infoContainer = d3.select("#chart")
                             .append("div")
                             .classed("security-info", true)
-   
 
-    const x = d3.scaleTime().range([0, width]);
-    const y = d3.scaleLinear().range([height, 0])
+    const xScale = d3.scaleTime().range([0, width]).domain(d3.extent(data, function(d){return d.date})).nice();
+    const yScale = d3.scaleLinear().range([height, 0]).domain(d3.extent(data, function(d){return d.close})).nice();
 
+    const xDomain = xScale.domain();
+    const yRange = yScale.domain();
+
+    console.log(xDomain)
     const line = d3.line()
-                    .x(function(d){return x(d.date)})
-                    .y(function(d){return y(d.close)})
-   
-    x.domain(d3.extent(data, function(d){return d.date})).nice()
-        
-    y.domain(d3.extent(data, function(d){return d.close})).nice();
+                    .x(function(d){return xScale(d.date)})
+                    .y(function(d){return yScale(d.close)})
         
 
     svg.append("g")
         .attr('class', 'x-axis')
         .attr("transform", "translate(0, " + height + ")")
-        .call(d3.axisBottom(x)
+        .call(d3.axisBottom(xScale)
             .tickFormat(function(d){
                 const month = (d.getMonth() + 1).toString().length === 1 ? `0${d.getMonth() + 1}` : d.getMonth() + 1;
                 const day = d.getDate().toString().length === 1 ? "0" + d.getDate().toString() : d.getDate();
@@ -98,7 +160,7 @@ export function drawChart(dataArr){
     svg.append("g")
         .attr('class', 'y-axis')
         .attr("transform", "translate(" + width +", "+ 0 + ")")
-        .call(d3.axisRight(y)
+        .call(d3.axisRight(yScale)
             .tickFormat((d) => {
                 return d3.format(".2f")(d)
             })
@@ -138,15 +200,6 @@ export function drawChart(dataArr){
         .attr("stroke-linecap", "round")
         .attr("stroke-width", 1.0)
         .attr("d", line)
-
-    const toolTip = svg.append("g");
-
-    // svg.on("touchmove mousemove", () => {
-    //     const {date, close}
-    // })
-
-    
-
-    return svg.node()
+    toolTip(data, svg, width, height, margin, xScale, yScale, xDomain, yRange)
 }
 
