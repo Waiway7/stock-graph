@@ -18,6 +18,20 @@
   opacity: 0;
 }
 
+.overlay {
+  fill: none;
+  pointer-events: all;
+}
+
+.container-price{
+  background-color: blue;
+}
+  
+.x-hover-line, .y-hover-line {
+  stroke: #6F257F;
+  stroke-width: 2px;
+  stroke-dasharray: 3,3;
+}
 
 #chart{
   display: flex;
@@ -34,7 +48,7 @@
   position: relative;
   width: 70%;
   min-width: 40em;
-  padding-bottom: 100%; /* aspect ratio */
+
   vertical-align: top;
   overflow: hidden;
 }
