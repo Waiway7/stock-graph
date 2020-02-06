@@ -11,7 +11,25 @@ const parseData = (data) => {
     return dataArr
 }
 
-const toolTip = (data, svg, width, height, margin, xScale, yScale, xDomain, yDomain) => {
+const dummyElements = (svg, data, dataType) => {
+    const textWidth = [];
+    svg.append('g')
+        .selectAll('.dummyText')
+        .data(data)
+        .enter()
+        .append("text")
+        .attr("font-family","sans-serif")
+        .attr("font-size", "12px")
+        .text((d) => dataType(d))
+        .each(function(d, i) {
+            const width = this.getComputedTextLength();
+            textWidth.push(width)
+            this.remove()
+        })
+    return textWidth
+}
+
+const toolTip = (data, svg, width, height, margin, xScale, yScale, xDomain, yDomain, textWidth) => {
 
     const bisectDate = d3.bisector((d) => d.date).left
     const focus = svg.append("g")
@@ -25,23 +43,57 @@ const toolTip = (data, svg, width, height, margin, xScale, yScale, xDomain, yDom
     focus.append("line")
         .attr("class", "y-hover-line")
 
-    focus.append("g")
-        .attr("class", "close-price-container")
-        .style("background-color", "#D3D3D3")
-        .style('padding', 6)
-        .append("text")
-            .attr("class", "close-price")
-            .style("fill", "#A9A9A9")
-            .style("font-size", 12)
-            .attr("dy", ".31em");
+    svg.append("rect")
+        .attr('class', "close-price-container")
+        .attr("rx", 4)
+        .attr("ry", 4)
+        .attr("dy", "4em")
+
+    svg.append("text")
+        .attr("class", "close-price") 
+
+    svg.append("rect")
+        .attr('class', "target-date-container")
+        .attr("rx", 4)
+        .attr("ry", 4)
+        .attr("dy", "4em")
+
+    svg.append("text")
+        .attr("class", "target-date")  
 
     svg.append("rect")
         .attr("transform", "translate(" + 0 + "," + margin.top + ")")
         .attr("class", "overlay")
         .attr("width", width)
         .attr("height", height)
-        .on("mouseover", function() { focus.style("display", null); })
-        .on("mouseout", function() { focus.style("display", "none"); })
+        .on("mouseover", function() { 
+            focus.style("display", null); 
+            d3.select(this).style("cursor", "crosshair");
+            svg.select(".target-date")
+                .style("display",null)
+                .style("fill", "#FFFFFF")
+    
+                .attr("dy", "1.05em");
+            svg.select(".target-date-container")
+                .style("display", null)
+                .style("fill", "#0000000")
+
+            svg.select(".close-price-container")
+                .style("display", null)
+                .style("fill", "#0000000")
+            svg.select(".close-price")
+                .style("display",null)
+                .style("fill", "#FFFFFF")
+    
+                .attr("dy", ".31em");
+        })
+        .on("mouseout", function() { 
+            focus.style("display", "none")
+            svg.select(".close-price-container").style("display", "none")
+            svg.select(".close-price").style("display", "none")
+            svg.select(".target-date").style("display", "none")
+            svg.select(".target-date-container").style("display", "none")
+        })
         .on("mousemove", mousemove);
 
     function mousemove() {
@@ -52,14 +104,32 @@ const toolTip = (data, svg, width, height, margin, xScale, yScale, xDomain, yDom
         let d1 = data[i];
         let d = x0 - d0.date > d1.date - x0 ? d1 : d0;
 
-        var x = xScale(d.date);
-        var y = yScale(d.close);
-        console.log(yDomain[0])
+        const parseDate = (d) => {
+            const month = (d.getMonth() + 1).toString().length === 1 ? `0${d.getMonth() + 1}` : d.getMonth() + 1;
+            const day = d.getDate().toString().length === 1 ? "0" + d.getDate().toString() : d.getDate();
+            const year = d.getFullYear();
+            return `${month}/${day}/${year}`
+        }
+        const x = xScale(d.date);
+        const y = yScale(d.close);
 
-        focus.select(".close-price-container")
-            .attr("transform", "translate(" + (xScale(xDomain[1]) + 10) + "," + (y) + ")")
-        focus.select(".close-price")
-            .text(function() { return d.close; })
+        const xTargetRect = (x - 37.5) >= 0 ? (x - 37.5) : 0;
+        const xTargetLabel = (x - 25) >= 12 ? (x - 25) : 12;
+        
+        svg.select(".close-price-container")
+            .attr("transform", "translate(" + (xScale(xDomain[1])) + "," + (y - 7.5) + ")")
+            .attr("width", `${textWidth[i] + 2}`)
+            .attr("height", "14")
+        svg.select(".close-price")
+            .text(function() { return d.close.toFixed(2) })
+            .attr("transform", "translate(" + (xScale(xDomain[1]) + 4) + "," + (y) + ")")
+        svg.select(".target-date-container")
+            .attr("transform", "translate(" + (`${xTargetRect}`) + "," + (350 + 5) + ")")
+            .attr("width", "75")
+            .attr("height", "14")
+        svg.select(".target-date")
+            .text(function() {return parseDate(d.date)})
+            .attr("transform", "translate(" + (`${xTargetLabel}`) + "," + (350 + 5) + ")")
         focus.select('.x-hover-line')
             .attr('x1', x)
             .attr('y1', yScale(yDomain[0]))
@@ -70,11 +140,13 @@ const toolTip = (data, svg, width, height, margin, xScale, yScale, xDomain, yDom
             .attr('y1', y)
             .attr('x2', xScale(xDomain[1]))
             .attr('y2', y);
-            
     }
 }
 
 export function drawChart(dataArr){
+
+    const close = (d) => d.close.toFixed(2);
+    const date = (d) => d.date;
 
     const svgWidth = 800;
     const svgHeight = 400;
@@ -82,6 +154,7 @@ export function drawChart(dataArr){
     const width = svgWidth - margin.left - margin.right;
     const height = svgHeight - margin.top - margin.bottom;
 
+    const latestStockInformation = dataArr[0]
     const data = dataArr.reverse();
 
     const div = d3.select("#chart")
@@ -95,7 +168,6 @@ export function drawChart(dataArr){
                     .append("g")
                         .attr("transform", "translate(" + margin.left + ", "+ margin.top + ")")
 
-
     const infoContainer = d3.select("#chart")
                             .append("div")
                             .classed("security-info", true)
@@ -106,11 +178,11 @@ export function drawChart(dataArr){
     const xDomain = xScale.domain();
     const yRange = yScale.domain();
 
-    console.log(xDomain)
     const line = d3.line()
                     .x(function(d){return xScale(d.date)})
                     .y(function(d){return yScale(d.close)})
-        
+    
+    const textWidth = dummyElements(svg, data, close)
 
     svg.append("g")
         .attr('class', 'x-axis')
@@ -124,7 +196,7 @@ export function drawChart(dataArr){
                 }
                 return `${month}-${day}`
             })
-                 .tickPadding(10)
+                 .tickPadding(8)
             .tickSize(-height)
             // .call(g => {
             //  })
@@ -164,7 +236,7 @@ export function drawChart(dataArr){
             .tickFormat((d) => {
                 return d3.format(".2f")(d)
             })
-            .tickPadding(10)
+            .tickPadding(4)
             .tickSize(-width))
         .call(g => {
             g.selectAll("text")
@@ -184,6 +256,21 @@ export function drawChart(dataArr){
             // g.select(".domain")
             //     .attr('stroke', "none")
         })
+    svg.append("rect")
+        .attr('class', "latest-container")
+        .attr("rx", 4)
+        .attr("ry", 4)
+        .attr("fill", "#009933")
+        .attr("transform", "translate(" + (xScale(xDomain[1])) + "," + (yScale(latestStockInformation.close.toFixed(2)) - 7.5) + ")")
+        .attr("width", `${textWidth[textWidth.length - 1] + 2}`)
+        .attr("height", "14")
+        
+    svg.append("text")
+        .attr("class", "latest-close-price")
+        .style("fill", "#FFFFFF")
+        .attr("dy", ".31em")
+        .text(latestStockInformation.close.toFixed(2))
+        .attr("transform", "translate(" + (xScale(xDomain[1]) + 4) + "," + (yScale(latestStockInformation.close.toFixed(2))) + ")");
         
 
     // g.append("path")
@@ -200,6 +287,6 @@ export function drawChart(dataArr){
         .attr("stroke-linecap", "round")
         .attr("stroke-width", 1.0)
         .attr("d", line)
-    toolTip(data, svg, width, height, margin, xScale, yScale, xDomain, yRange)
+    toolTip(data, svg, width, height, margin, xScale, yScale, xDomain, yRange, textWidth)
 }
 
