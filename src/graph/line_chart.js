@@ -172,7 +172,7 @@ export function drawChart(dataArr){
                             .append("div")
                             .classed("security-info", true)
 
-    const xScale = d3.scaleTime().range([0, width]).domain(d3.extent(data, function(d){return d.date})).nice();
+    const xScale = d3.scaleTime().range([0, width]).domain(d3.extent([data[0].date, new Date()]));
     const yScale = d3.scaleLinear().range([height, 0]).domain(d3.extent(data, function(d){return d.close})).nice();
 
     const xDomain = xScale.domain();
@@ -188,15 +188,15 @@ export function drawChart(dataArr){
         .attr('class', 'x-axis')
         .attr("transform", "translate(0, " + height + ")")
         .call(d3.axisBottom(xScale)
-            .tickFormat(function(d){
-                const month = (d.getMonth() + 1).toString().length === 1 ? `0${d.getMonth() + 1}` : d.getMonth() + 1;
-                const day = d.getDate().toString().length === 1 ? "0" + d.getDate().toString() : d.getDate();
-                if (month === 1 && day === 1){
-                    return d.getFullYear()
-                }
-                return `${month}-${day}`
-            })
-                 .tickPadding(8)
+            .ticks(d3.timeDay.filter(d=>d3.timeDay.count(0, d) % 2 === 0))
+            .tickFormat(d3.timeFormat('%m/%d'))
+            .tickSizeOuter(0)
+            // .tickFormat(function(d){
+            //     const month = (d.getMonth() + 1).toString().length === 1 ? `0${d.getMonth() + 1}` : d.getMonth() + 1;
+            //     const day = d.getDate().toString().length === 1 ? "0" + d.getDate().toString() : d.getDate();
+            //     return `${month}-${day}`
+            // })
+            //      .tickPadding(8)
             .tickSize(-height)
             // .call(g => {
             //  })
