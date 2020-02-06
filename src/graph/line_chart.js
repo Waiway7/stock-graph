@@ -1,14 +1,11 @@
 import * as d3 from "d3";
 
 const parseData = (data) => {
-    const dataArr = [];
     for (let i = data.length - 1; i >= 0; i--){
-        dataArr.push({
-            "date": new Date(data[i].date),
-            "close": data[i].close
-        })
+        let date = new Date(data[i].date).setHours(0,0,0,0)
+        data[i].date = new Date(date)
     }
-    return dataArr
+    return data
 }
 
 const dummyElements = (svg, data, dataType) => {
@@ -155,7 +152,7 @@ export function drawChart(dataArr){
     const height = svgHeight - margin.top - margin.bottom;
 
     const latestStockInformation = dataArr[0]
-    const data = dataArr.reverse();
+    const data = parseData(dataArr).reverse();
 
     const div = d3.select("#chart")
                     .append("div")
@@ -172,7 +169,7 @@ export function drawChart(dataArr){
                             .append("div")
                             .classed("security-info", true)
 
-    const xScale = d3.scaleTime().range([0, width]).domain(d3.extent([data[0].date, new Date()]));
+    const xScale = d3.scaleTime().range([0, width]).domain(d3.extent(data, function(d){return d.date}));
     const yScale = d3.scaleLinear().range([height, 0]).domain(d3.extent(data, function(d){return d.close})).nice();
 
     const xDomain = xScale.domain();
@@ -188,7 +185,7 @@ export function drawChart(dataArr){
         .attr('class', 'x-axis')
         .attr("transform", "translate(0, " + height + ")")
         .call(d3.axisBottom(xScale)
-            .ticks(d3.timeDay.filter(d=>d3.timeDay.count(0, d) % 2 === 0))
+            .ticks(d3.timeWeek.filter(d=>d3.timeDay.count(0, d) % 1 === 0))
             .tickFormat(d3.timeFormat('%m/%d'))
             .tickSizeOuter(0)
             // .tickFormat(function(d){
