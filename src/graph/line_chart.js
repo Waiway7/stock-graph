@@ -33,7 +33,25 @@ const toolTip = (data, svg, width, height, margin, xScale, yScale, xDomain, yDom
                     .attr("class", "focus")
                     .style("display", "none");
 
-                    
+    const legend = svg.append("g")
+                    .attr("class", "legend")
+
+    legend.append("rect")
+        .attr("class", "legend-container")
+        .attr("width", 115)
+        .attr("height", 115)
+        .attr("fill", "white")
+        // .attr("stroke-width", 1)
+        .attr("rx", 2)
+        .attr("ry", 2)
+        .attr("transform", "translate(" + (10) + "," + (10) + ")")
+        .attr("filter", "url(#dropshadow)")
+        .attr("opacity", "0.7")
+    
+    legend.append("text")
+        .attr("class", )
+        
+
     focus.append("line")
         .attr("class", "x-hover-line")
 
@@ -42,15 +60,18 @@ const toolTip = (data, svg, width, height, margin, xScale, yScale, xDomain, yDom
 
     svg.append("rect")
         .attr('class', "close-price-container")
+        .style("display", "none")
         .attr("rx", 4)
         .attr("ry", 4)
         .attr("dy", "4em")
+    
 
     svg.append("text")
         .attr("class", "close-price") 
 
     svg.append("rect")
         .attr('class', "target-date-container")
+        .style("display", "none")
         .attr("rx", 4)
         .attr("ry", 4)
         .attr("dy", "4em")
@@ -59,7 +80,7 @@ const toolTip = (data, svg, width, height, margin, xScale, yScale, xDomain, yDom
         .attr("class", "target-date")  
 
     svg.append("rect")
-        .attr("transform", "translate(" + 0 + "," + margin.top + ")")
+        .attr("transform", "translate(" + 0 + "," + 0 + ")")
         .attr("class", "overlay")
         .attr("width", width)
         .attr("height", height)
@@ -69,7 +90,6 @@ const toolTip = (data, svg, width, height, margin, xScale, yScale, xDomain, yDom
             svg.select(".target-date")
                 .style("display",null)
                 .style("fill", "#FFFFFF")
-    
                 .attr("dy", "1.05em");
             svg.select(".target-date-container")
                 .style("display", null)
@@ -158,12 +178,48 @@ export function drawChart(dataArr){
                     .append("div")
                     .classed("svg-container", true)
 
-    const svg = div.append("svg")
+
+    const s = div.append("svg")
                     .classed("svg-graph", true)
                     .attr("preserveAspectRatio", "xMinYMin meet")
                     .attr("viewBox", "0 0 850 400")
-                    .append("g")
+    var defs = d3.select(".svg-graph")
+                    .append("defs")
+    var filter = defs.append("filter")
+                    .attr("id", "dropshadow")
+                    
+
+    filter.append("feGaussianBlur")
+        .attr("in", "SourceAlpha")
+        .attr("stdDeviation", 2.5)
+        .attr("result", "blur");
+    filter.append("feOffset")
+        .attr("in", "blur")
+        .attr("dx", 1)
+        .attr("dy", 1)
+        .attr("result", "offsetBlur");
+    filter.append("feFlood")
+        .attr("in", "offsetBlur")
+        .attr("flood-color", "black")
+        .attr("flood-opacity", "0.4")
+        .attr("result", "offsetColor");
+    filter.append("feComposite")
+        .attr("in", "offsetColor")
+        .attr("in2", "offsetBlur")
+        .attr("operator", "in")
+        .attr("result", "offsetBlur");
+    
+    const feMerge = filter.append("feMerge")
+    
+    feMerge.append("feMergeNode")
+        .attr("in", "offsetBlur")
+    feMerge.append("feMergeNode")
+        .attr("in", "SourceGraphic");
+
+    const svg =  s.append("g")
                         .attr("transform", "translate(" + margin.left + ", "+ margin.top + ")")
+    
+    
 
     const infoContainer = d3.select("#chart")
                             .append("div")
@@ -185,15 +241,15 @@ export function drawChart(dataArr){
         .attr('class', 'x-axis')
         .attr("transform", "translate(0, " + height + ")")
         .call(d3.axisBottom(xScale)
-            .ticks(d3.timeWeek.filter(d=>d3.timeDay.count(0, d) % 1 === 0))
-            .tickFormat(d3.timeFormat('%m/%d'))
-            .tickSizeOuter(0)
-            // .tickFormat(function(d){
-            //     const month = (d.getMonth() + 1).toString().length === 1 ? `0${d.getMonth() + 1}` : d.getMonth() + 1;
-            //     const day = d.getDate().toString().length === 1 ? "0" + d.getDate().toString() : d.getDate();
-            //     return `${month}-${day}`
-            // })
-            //      .tickPadding(8)
+            // .ticks(d3.timeWeek.filter(d=>d3.timeDay.count(0, d) % 1 === 0))
+            // .tickFormat(d3.timeFormat('%m/%d'))
+            // .tickSizeOuter(0)
+            .tickFormat(function(d){
+                const month = (d.getMonth() + 1).toString().length === 1 ? `0${d.getMonth() + 1}` : d.getMonth() + 1;
+                const day = d.getDate().toString().length === 1 ? "0" + d.getDate().toString() : d.getDate();
+                return `${month}-${day}`
+            })
+                 .tickPadding(8)
             .tickSize(-height)
             // .call(g => {
             //  })
@@ -213,7 +269,7 @@ export function drawChart(dataArr){
             g.select(".domain")
                 .attr('stroke', "#A9A9A9")
                 .attr('stroke-width', 0.7)
-                .attr('opacity, 0.3')
+                .attr('opacity', 0)
             // g.select(".domain")
             //     .attr('stroke', "none")
         })
