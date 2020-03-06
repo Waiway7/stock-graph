@@ -38,7 +38,7 @@ export function drawChart(dataArr){
     //View Box of Graph
     const svgWidth = 800;
     const svgHeight = 400;
-    const margin = { top: 20, right: 20, bottom: 30, left: 18};
+    const margin = { top: 40, right: 20, bottom: 30, left: 18};
     const dimensions = {
         width: (svgWidth - margin.left - margin.right),
         height: (svgHeight - margin.top - margin.bottom)
@@ -54,7 +54,7 @@ export function drawChart(dataArr){
     const svg = d3.select(".svg-graph")
                     .append("g")
                     .attr("class", "graph")
-                    .attr("transform", "translate(" + margin.left + ", "+ margin.top + ")")
+                    .attr("transform", "translate(" + margin.left + ", "+ 10 + ")")
 
     //Getting the ranges of y and domain of y and ticks
     const xScale = d3.scaleTime().range([0, dimensions.width]).domain(d3.extent(data, function(d){return d.date}));
