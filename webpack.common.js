@@ -1,8 +1,7 @@
 const path = require("path");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const outputDir = "./dist";
-const Dotenv = require('dotenv-webpack');
-const { DefinePlugin } = require('webpack'); 
+
 
 module.exports = {
   entry: ['@babel/polyfill', path.resolve(__dirname, "src", "index.js")], //
@@ -86,12 +85,7 @@ module.exports = {
     ]
   },
   plugins: [
-    new Dotenv({
-      path: path.resolve(__dirname,'src', './.env'),
-      silent: process.env.NODE_ENV === 'production' }),
-    new DefinePlugin({
-      'process.env.NODE_ENV': "production"
-    }),
+  
     new MiniCssExtractPlugin({
       // Options similar to the same options in webpackOptions.output
       // all options are optional
