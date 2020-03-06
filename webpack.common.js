@@ -1,7 +1,7 @@
 const path = require("path");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const outputDir = "./dist";
-require('dotenv').config(path.resolve(__dirname,'src', './.env'));
+// require('dotenv').config(path.resolve(__dirname,'src', './.env'));
 // const Dotenv = require('dotenv-webpack');
 // const { DefinePlugin } = require('webpack'); 
 
