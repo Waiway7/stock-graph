@@ -1,8 +1,8 @@
 const path = require("path");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const outputDir = "./dist";
-// require('dotenv').config(path.resolve(__dirname,'src', './.env'));
-// const Dotenv = require('dotenv-webpack');
+// const Dotenv = require('dotenv').config(path.resolve(__dirname,'src', './.env'));
+const Dotenv = require('dotenv-webpack');
 // const { DefinePlugin } = require('webpack'); 
 
 module.exports = {
@@ -87,9 +87,9 @@ module.exports = {
     ]
   },
   plugins: [
-    // new Dotenv({
-    //   path: path.resolve(__dirname,'src', './.env'),
-    //   silent: process.env.NODE_ENV === 'production' }),
+    new Dotenv({
+      path: path.resolve(__dirname,'src', './.env'),
+      silent: process.env.NODE_ENV === 'production' }),
     // new DefinePlugin({
     //   'process.env.NODE_ENV': "production"
     // }),
