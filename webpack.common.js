@@ -87,7 +87,8 @@ module.exports = {
   },
   plugins: [
     new Dotenv({
-      path: path.resolve(__dirname,'src', './.env')
+      path: path.resolve(__dirname,'src', './.env'),
+      silent: process.env.NODE_ENV === 'production' 
     }),
     new MiniCssExtractPlugin({
       // Options similar to the same options in webpackOptions.output
