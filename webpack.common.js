@@ -87,9 +87,7 @@ module.exports = {
     ]
   },
   plugins: [
-    new Dotenv({
-      path: path.resolve(__dirname,'src', './.env'),
-      silent: process.env.NODE_ENV === 'production' }),
+
     // new DefinePlugin({
     //   'process.env.NODE_ENV': "production"
     // }),
