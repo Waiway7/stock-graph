@@ -5,6 +5,5 @@ import * as d3 from "d3";
 
 
 window.addEventListener("DOMContentLoaded", () => {
-  console.log(process.env.API_KEY)
   retreiveSecurityData()  
 });
