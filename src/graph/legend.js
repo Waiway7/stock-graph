@@ -1,6 +1,7 @@
 import * as d3 from "d3";
 
 //Creates elements to display security prices at the given day
+
 export const legendLabels = (legend) => {
     
     legend.append("rect")
@@ -39,22 +40,52 @@ export const legendLabels = (legend) => {
 
 }
 
+const dummyElements = (svg, data) => {
+    const textWidth = [];
+    svg.append('g')
+        .selectAll('.dummyText')
+        .data(data)
+        .enter()
+        .append("text")
+        .attr("font-family","sans-serif")
+        .attr("font-size", "12px")
+        .text((d) => {return d})
+        .each(function(d, i) {
+            const width = this.getComputedTextLength();
+            textWidth.push(width)
+            this.remove()
+        })
+    return textWidth
+}
+const toFixed = (number, decimals) => {
+    var x = Math.pow(10, Number(decimals) + 1);
+    return (Number(number) + (1 / x)).toFixed(decimals)
+}
+
 //Displays the current close price and company's ticker
 export const tickerLabel = (ticker, widthCurrPrice, data, security) => {
+    if (document.getElementsByClassName("ticker")[0]){
+        d3.select(".ticker-container").remove();
+        d3.select(".ticker-security").remove();
+    }
+    const svg = d3.select(".graph")
+    const widthTicker = dummyElements(svg, [security.ticker]);
+    const totalWidth = parseInt(widthTicker) + parseInt(widthCurrPrice);
     ticker.append("rect")
         .attr("class", "ticker-container")
-        .attr("width", 31 + widthCurrPrice)
+        .attr("width", totalWidth + 5)
         .attr("height", 15)
         .attr("fill", "white")
         .attr("rx", 2)
         .attr("ry", 2)
         .attr("transform", "translate(" + (10) + "," + (10) + ")")
         .attr("filter", "url(#dropshadow)")
+
     ticker.append("text")
         .attr("class", "ticker-security")
         .attr("font-size", "10")
         .attr("font-family", "sans-serif")
-        .text(`${security.ticker} ${data[data.length - 1].close}`)
+        .text(`${security.ticker} ${toFixed(data[data.length - 1].close, 2)}`)
         .attr("transform", "translate(" + (15) + "," + (21) + ")")
 }
 

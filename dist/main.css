@@ -20,6 +20,10 @@ body {
 .option-container {
   width: 100%; }
 
+.company-name {
+  height: 500px;
+}
+
 #ditto {
   color: white; }
 
@@ -35,6 +39,10 @@ body {
   font-family: 'Indie Flower', cursive;
   font-weight: 100;
   margin: auto; }
+
+#title-option{
+  color: white;
+}
 
 #powered {
   margin-left: 1em;

@@ -1,16 +1,41 @@
 import * as d3 from "d3";
 import {legendLabels, tickerLabel, target} from "./legend"
 
+const toFixed = (number, decimals) => {
+    var x = Math.pow(10, Number(decimals) + 1);
+    return (Number(number) + (1 / x)).toFixed(decimals);
+}
+
+const dummyElements = (svg, data) => {
+    const textWidth = [];
+    svg.append('g')
+        .selectAll('.dummyText')
+        .data(data)
+        .enter()
+        .append("text")
+        .attr("font-family","sans-serif")
+        .attr("font-size", "12px")
+        .text((d) => {return d})
+        .each(function(d, i) {
+            const width = this.getComputedTextLength();
+            textWidth.push(width)
+            this.remove()
+        })
+    return textWidth
+}
+
 export const toolTip = (data, dimensions, margin, xScale, yScale, xDomain, yDomain, textWidth, security) => {
     //Finds the given position of a date in the array
     const bisectDate = d3.bisector((d) => d.date).left
-
     //Elements to contain information
     const svg = d3.select(".graph")
+    const tickerWidthLabel = dummyElements(svg, [security.ticker]);
+
     const focus = svg.append("g").attr("class", "focus").style("display", "none");
     const legend = svg.append("g").attr("class", "legend").style("display", "none")
+   
     const ticker = svg.append("g").attr("class", "ticker")
-    
+
     //Displays current security's information based on mouseover
     legendLabels(legend)
 
@@ -44,7 +69,7 @@ export const toolTip = (data, dimensions, margin, xScale, yScale, xDomain, yDoma
         let d1 = data[i];
         let d = x0 - d0.date > d1.date - x0 ? d1 : d0;
 
-        console.log(d)
+        // console.log(d)
 
         const parseDate = (d) => {
             const month = (d.getMonth() + 1).toString().length === 1 ? `0${d.getMonth() + 1}` : d.getMonth() + 1;
@@ -59,14 +84,14 @@ export const toolTip = (data, dimensions, margin, xScale, yScale, xDomain, yDoma
         const marginRight = labelWidth + 100 - 5 - 20
 
         const vol = d.volume / 1000000
-        const volLabel = vol < 0 ? `${vol.toFixed(2)}` : (vol >= 1000 ? `${vol.toFixed(2)+"B"}` : `${vol.toFixed(2)+"M"}`)
+        const volLabel = vol < 0 ? `${toFixed(vol, 2)}` : (vol >= 1000 ? `${toFixed(vol, 2)+"B"}` : `${toFixed(vol, 2)+"M"}`)
         const volWidth = vol >= 100 ? 4 : 0
-
+        const tickerLengthCurr = parseInt(textWidth[i]) + parseInt(tickerWidthLabel);
         const xTargetRect = (x - 37.5) >= 0 ? (x - 37.5) : 0;
         const xTargetLabel = (x - 25) >= 12 ? (x - 25) : 12;
 
         legend.select(".open")
-            .text(() => d.open.toFixed(2))
+            .text(() => toFixed(d.open, 2))
             .attr("transform", "translate(" + marginRight + "," + 50 +")")
         legend.select(".open-label")
             .text("Open")
@@ -75,19 +100,19 @@ export const toolTip = (data, dimensions, margin, xScale, yScale, xDomain, yDoma
             .text("High")
             .attr("transform", "translate(" + 20 + "," + 65+")")
         legend.select(".high")
-            .text(() => d.high.toFixed(2))
+            .text(() => toFixed(d.high, 2))
             .attr("transform", "translate(" + marginRight + "," + 65 +")")
         legend.select(".low-label")
             .text("Low")
             .attr("transform", "translate(" + 20 + "," + 80 +")")
         legend.select(".low")
-            .text(() => d.low.toFixed(2))
+            .text(() => toFixed(d.low, 2))
             .attr("transform", "translate(" + marginRight + "," + 80 +")")   
         legend.select(".close-label")
             .text("Close")
             .attr("transform", "translate(" + 20 + "," + 95 +")")
         legend.select(".close")
-            .text(() => d.close.toFixed(2))
+            .text(() => toFixed(d.close, 2))
             .attr("transform", "translate(" + marginRight + "," + 95 +")")   
         legend.select(".volume-label")
             .text("Volume")
@@ -97,16 +122,18 @@ export const toolTip = (data, dimensions, margin, xScale, yScale, xDomain, yDoma
             .attr("transform", "translate(" + (marginRight - 3 - volWidth) + "," + 110 +")")   
         legend.select(".legend-container")
             .attr("width", `${labelWidth + 105}`)
-        ticker.select(".ticker-security")
-            .attr("width", Math.ceil(textWidth[i] + 31))
-            .text(`${security.ticker} ${d.close}`)
+        d3.select(".ticker-security")
+            .text(`${security.ticker} ${toFixed(d.close, 2)}`)
+
+        d3.select(".ticker-container")
+            .attr("width", tickerLengthCurr + 5)
 
         svg.select(".close-price-container")
             .attr("transform", "translate(" + (xScale(xDomain[1])) + "," + (y - 7.5) + ")")
             .attr("width", `${textWidth[i] + 2}`)
             .attr("height", "14")
         svg.select(".close-price")
-            .text(function() { return d.close.toFixed(2) })
+            .text(function() { return toFixed(d.close, 2) })
             .attr("transform", "translate(" + (xScale(xDomain[1]) + 4) + "," + (y) + ")")
         svg.select(".target-date-container")
             .attr("transform", "translate(" + (`${xTargetRect}`) + "," + (335) + ")")

@@ -2,6 +2,21 @@ import * as d3 from "d3";
 import {elementHTML} from "./elements"
 import {toolTip} from "./tool-tip"
 
+//View Box of Graph
+const svgWidth = 800;
+const svgHeight = 400;
+const margin = { top: 40, right: 20, bottom: 30, left: 18};
+const dimensions = {
+    width: (svgWidth - margin.left - margin.right),
+    height: (svgHeight - margin.top - margin.bottom)
+}
+
+const toFixed = (number, decimals) => {
+    var x = Math.pow(10, Number(decimals) + 1);
+    return (Number(number) + (1 / x)).toFixed(decimals)
+}
+
+
 const parseData = (data) => {
     for (let i = data.length - 1; i >= 0; i--){
         let date = new Date(data[i].date).setHours(0,0,0,0)
@@ -29,20 +44,94 @@ const dummyElements = (svg, data, dataType) => {
 }
 
 export function drawChart(dataArr){
-    console.log(dataArr)
 
+    if (document.getElementsByClassName("svg-graph")[0]){
+        updateData(dataArr)
+    }
+    else {
+        initialData(dataArr)
+    }
+}
+
+const updateData = (dataArr) => {
     //Functions to get close price and date
-    const close = (d) => d.close.toFixed(2);
+    const close = (d) => toFixed(d.close, 2);
     const date = (d) => d.date;
 
-    //View Box of Graph
-    const svgWidth = 800;
-    const svgHeight = 400;
-    const margin = { top: 40, right: 20, bottom: 30, left: 18};
-    const dimensions = {
-        width: (svgWidth - margin.left - margin.right),
-        height: (svgHeight - margin.top - margin.bottom)
-    }
+    const svg = d3.select(".graph")
+    // const tickerWidth = dummyElements(svg, dataArr, )
+    const latestStockInformation = dataArr.stock_prices[0]
+    const data = parseData(dataArr.stock_prices).reverse();
+    const textWidth = dummyElements(svg, data, close)
+    //Getting the ranges of y and domain of y and ticks
+    const xScale = d3.scaleTime().range([0, dimensions.width]).domain(d3.extent(data, function(d){return d.date}));
+    const yScale = d3.scaleLinear().range([dimensions.height, 0]).domain(d3.extent(data, function(d){return d.close})).nice();
+    
+    const xDomain = xScale.domain();
+    const yRange = yScale.domain();
+
+    d3.select(".latest-container")
+        .attr("fill", "#009933")
+        .attr("transform", "translate(" + (xScale(xDomain[1])) + "," + (yScale(toFixed(latestStockInformation.close, 2)) - 7.5) + ")")
+        .attr("width", `${textWidth[textWidth.length - 1] + 2}`)
+        .attr("height", "14")
+    d3.select(".latest-close-price")
+        .style("fill", "#FFFFFF")
+        .attr("dy", ".31em")
+        .text(toFixed(latestStockInformation.close, 2))
+        .attr("transform", "translate(" + (xScale(xDomain[1]) + 4) + "," + (yScale(toFixed(latestStockInformation.close, 2))) + ")");
+      //Stock information
+      //Gets the width of text
+
+    d3.select(".y-axis")
+        .transition().duration(750)
+        .call(d3.axisRight(yScale)
+        .tickFormat((d) => {
+            return d3.format(".2f")(d)
+        })
+        .tickPadding(4)
+        .tickSize(-dimensions.width))
+        .call(g => {
+            g.selectAll("text")
+                .attr('fill', '#000000')
+                .attr('stroke-width', 0.7)
+                // .attr('opacity', 0.3)
+        
+            g.selectAll("line")
+                .attr('stroke', '#A9A9A9')
+                .attr('stroke-width', 0.7)
+                .attr('opacity', 0.3)
+        
+            g.select(".domain")
+                .attr('stroke', "#A9A9A9")
+                .attr('stroke-width', 0.7)
+                .attr('opacity, 0.3')
+        })
+
+        const line = d3.line()
+                        .x(function(d){return xScale(d.date)})
+                        .y(function(d){return yScale(d.close)})
+        const path = d3.select("path.dots")
+        path.exit().remove();
+        path
+            .datum(data)
+            .attr('class', 'dots')
+            .transition().duration(750)
+            .attr("fill", "none")
+            .attr("stroke", "#ad6eff")
+            .attr("stroke-linejoin", "round")
+            .attr("stroke-linecap", "round")
+            .attr("stroke-width", 1.0)
+            .attr("d", line);
+
+        toolTip(data, dimensions, margin, xScale, yScale, xDomain, yRange, textWidth, dataArr.security)
+}
+
+const initialData = (dataArr) => {
+    //Functions to get close price and date
+    const close = (d) => toFixed(d.close, 2);
+    const date = (d) => d.date;
+
 
     //Stock information
     const latestStockInformation = dataArr.stock_prices[0]
@@ -125,16 +214,15 @@ export function drawChart(dataArr){
                 .attr('stroke', "#A9A9A9")
                 .attr('stroke-width', 0.7)
                 .attr('opacity, 0.3')
-            // g.select(".domain")
-            //     .attr('stroke', "none")
         })
+
     //Displays current close price
     svg.append("rect")
         .attr('class', "latest-container")
         .attr("rx", 4)
         .attr("ry", 4)
         .attr("fill", "#009933")
-        .attr("transform", "translate(" + (xScale(xDomain[1])) + "," + (yScale(latestStockInformation.close.toFixed(2)) - 7.5) + ")")
+        .attr("transform", "translate(" + (xScale(xDomain[1])) + "," + (yScale(toFixed(latestStockInformation.close, 2)) - 7.5) + ")")
         .attr("width", `${textWidth[textWidth.length - 1] + 2}`)
         .attr("height", "14")
         
@@ -142,22 +230,25 @@ export function drawChart(dataArr){
         .attr("class", "latest-close-price")
         .style("fill", "#FFFFFF")
         .attr("dy", ".31em")
-        .text(latestStockInformation.close.toFixed(2))
-        .attr("transform", "translate(" + (xScale(xDomain[1]) + 4) + "," + (yScale(latestStockInformation.close.toFixed(2))) + ")");
+        .text(toFixed(latestStockInformation.close, 2))
+        .attr("transform", "translate(" + (xScale(xDomain[1]) + 4) + "," + (yScale(toFixed(latestStockInformation.close, 2))) + ")");
 
     //Creates the line
     const line = d3.line()
         .x(function(d){return xScale(d.date)})
         .y(function(d){return yScale(d.close)})
 
-    svg.append("path")
-        .datum(data)
-        .attr("fill", "none")
-        .attr("stroke", "steelblue")
-        .attr("stroke-linejoin", "round")
-        .attr("stroke-linecap", "round")
-        .attr("stroke-width", 1.0)
-        .attr("d", line)
+    const dots = svg.append("path")
+                    .datum(data)
+                    .attr('class', 'dots')
+                    .attr("fill", "none")
+                    .attr("stroke", "#ad6eff")
+                    .attr("stroke-linejoin", "round")
+                    .attr("stroke-linecap", "round")
+                    .attr("stroke-width", 1.5)
+                    .attr("d", line)
+
     toolTip(data, dimensions, margin, xScale, yScale, xDomain, yRange, textWidth, dataArr.security)
 }
+
 
